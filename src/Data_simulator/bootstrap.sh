@@ -6,5 +6,5 @@ sudo python3 -m pip install \
     pandas \
     numpy \
     fsspec \
-	faker \
-	tqdm 
+    faker \
+    tqdm 
