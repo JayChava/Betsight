@@ -36,7 +36,7 @@ Online betting companies rely solely on the performance of their website for pro
 
 ## Architecture
 
-![stack](https://github.com/JayChava/Betsight/blob/main/img/tech_stack.PNG)
+![stack](https://github.com/JayChava/Betsight/blob/master/img/tech_stack.PNG)
 
 The tech Stack has two pipelines:
 

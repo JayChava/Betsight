@@ -1,1 +1,1 @@
-![batching](https://github.com/JayChava/Betsight/blob/main/img/batch_pipeline.PNG) 
+![batching](https://github.com/JayChava/Betsight/blob/master/img/batch_pipeline.PNG) 

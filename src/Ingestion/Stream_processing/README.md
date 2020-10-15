@@ -1,1 +1,1 @@
-![stream](https://github.com/JayChava/Betsight/blob/main/img/stream_pipeline.PNG) 
+![stream](https://github.com/JayChava/Betsight/blob/master/img/stream_pipeline.PNG) 

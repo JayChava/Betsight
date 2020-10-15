@@ -101,4 +101,4 @@ Clickstream data is propreitary for internet companies, their key business desci
     * Bet_type
     * Amount
 
-![clickstream](https://github.com/JayChava/Betsight/blob/main/img/clickstream_data.PNG) 
+![clickstream](https://github.com/JayChava/Betsight/blob/master/img/clickstream_data.PNG) 
