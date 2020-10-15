@@ -1,0 +1,12 @@
+aws emr create-cluster --applications Name=Spark Name=Zeppelin \
+					   --bootstrap-actions '[{"Path":"s3://jay-de-insight/bootstrap.sh","Args":["instance.isMaster=true","echo running on master node"],"Name":"Bootstrap action"}]' \
+					   --ebs-root-volume-size 10 \
+					   --ec2-attributes '{"KeyName":"Jay-te","InstanceProfile":"EMR_EC2_DefaultRole","SubnetId":"subnet-a5f493ab","EmrManagedSlaveSecurityGroup":"sg-031587d8eb22966fb","EmrManagedMasterSecurityGroup":"sg-0bdb9f8e4e8e7c4b3"}' \
+					   --service-role EMR_DefaultRole \
+					   --enable-debugging \
+					   --release-label emr-5.30.1 \
+					   --log-uri 's3n://aws-logs-005867170719-us-east-1/elasticmapreduce/' \
+					   --name 'master_compute' \
+					   --instance-groups '[{"InstanceCount":1,"EbsConfiguration":{"EbsBlockDeviceConfigs":[{"VolumeSpecification":{"SizeInGB":32,"VolumeType":"gp2"},"VolumesPerInstance":2}]},"InstanceGroupType":"MASTER","InstanceType":"c5.xlarge","Name":"Instance Group"},{"InstanceCount":2,"EbsConfiguration":{"EbsBlockDeviceConfigs":[{"VolumeSpecification":{"SizeInGB":32,"VolumeType":"gp2"},"VolumesPerInstance":2}]},"InstanceGroupType":"CORE","InstanceType":"c5.xlarge","Name":"Core Instance Group"}]' \
+					   --scale-down-behavior TERMINATE_AT_TASK_COMPLETION \
+					   --region us-east-1

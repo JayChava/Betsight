@@ -1,0 +1,46 @@
+Step1 : Setup ec2 instance of desired size and SSH into it.
+
+Step2 : run the following code to download Grafana.
+
+#!/bin/bash
+
+echo ‘deb https://packages.grafana.com/oss/deb stable main’ >> /etc/apt/sources.list
+curl https://packages.grafana.com/gpg.key | sudo apt-key add -
+sudo apt-get update
+sudo apt-get -y install grafana
+systemctl daemon-reload
+systemctl start grafana-server
+systemctl enable grafana-server.service
+
+Step3: Change the permission of file by using the command.
+
+chmod +x grafanainstallation.sh
+
+Step4:  execute the shell script to install Grafana by using command.
+
+./grafanainstallation.sh
+
+Step5: Verify whether Grafana is running or not by using following command
+
+service grafana-server status
+
+If the Grafana Server is not running run the below command to start it.
+
+service grafana-server start
+
+Step6: Take the IP address or DNS of your server and place it on address bar of the any browser along with Grafana port 3000. 
+
+PublicDNS:3000
+
+Step7: change to port number 80.
+Note: careful with user privileges
+* use iptables if you run into issues (https://youtu.be/OUN3ha9fyh0)
+change port in following file
+- /etc/grafana/grafana.ini
+
+[server]
+http_port=8080
+
+Step8: Restart Grafana.
+
+service grafana-server restart
