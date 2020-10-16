@@ -9,7 +9,7 @@ pg_usr = os.getenv('PGSQL_USER')
 pg_pw = os.getenv('PGSQL_PW')
 pg_url = os.getenv('PGSQL_URL')
 
-print("Kafka topic strtuctured streaming application starting")
+
 
 # initializing spark session
 spark = SparkSession \
@@ -19,21 +19,53 @@ spark = SparkSession \
 
 spark.sparkContext.setLogLevel("ERROR")
 
-# Creating DataFrame representing the stream of input
-df = spark \
+# Creating DataFrame representing the stream of topic1 odds data input
+df_odds = spark \
   .readStream \
   .format("kafka") \
-  .option("kafka.bootstrap.servers", "ec2-18-205-239-177.compute-1.amazonaws.com:9092") \
-  .option("subscribe", "new") \
+  .option("kafka.bootstrap.servers", "PublicDNS:9092") \
+  .option("subscribe", "topic1") \
   .option("startingOffsets", "earliest") \
   .load()
 
 
 print("schema df:")
-df.printSchema()
+df_odds.printSchema()
 
-df1 = df.selectExpr("CAST(value AS STRING)", "timestamp")
+df_odds = df_odds.selectExpr("CAST(value AS STRING)", "timestamp")
 
+# Creating DataFrame representing the stream of topic2 clicks data input
+df_clicks = spark \
+  .readStream \
+  .format("kafka") \
+  .option("kafka.bootstrap.servers", "PublicDNS:9092") \
+  .option("subscribe", "topic2") \
+  .option("startingOffsets", "earliest") \
+  .load()
+
+
+print("schema df:")
+df_clicks.printSchema()
+
+df_clicks = df_clicks.selectExpr("CAST(value AS STRING)", "timestamp")
+
+
+# Define watermarks
+oddsWithWatermark = df_odds \
+  .selectExpr("gameid AS oddsid", "oddsTime") \
+  .withWatermark("oddsTime", "10 seconds ")
+clickstreamWithWatermark = df_clicks \
+  .selectExpr("gameid AS cliskidId", "clickTime") \
+  .withWatermark("clickTime", "20 seconds")        # max 20 seconds late
+
+
+# Inner join with time range conditions
+
+df_merge = oddsWithWatermark.join(clickstreamWithWatermark,expr("""cliskidId = oddsid AND 
+                                                                   clickTime >= oddsTime AND 
+                                                                   clickTime <= oddsTime + interval 1 minutes """ ))    
+                                                                   
+                                                                       
 # function to write to database
 def write_db(df,table):
 
@@ -45,8 +77,6 @@ def write_db(df,table):
     .option("password",'pg_pw') \
     .option("driver", "org.postgresql.Driver") \
     .mode("append").save()
-
-
 
 
 # Defining Schema of data
@@ -74,12 +104,10 @@ gameweek_table_schema = StructType() \
                 .add("winnings", StringType())
 
 # creating dataframe from stream
-df2 = df1.select(from_json(col("value"), gameweek_table_schema).alias("gameweek_details"), "timestamp")
+df2 = df_merge.select(from_json(col("value"), gameweek_table_schema).alias("gameweek_details"), "timestamp")
 df3 = df2.select("gameweek_details.*", "timestamp")
 print('schema df3')
 df3.printSchema()
-
-
 
 def write_postgresql_main(df, epochId):
     df.persist()
@@ -118,10 +146,10 @@ query_main = df3.writeStream \
             .outputMode("update")\
             .start()
 
-#query_main.awaitTermination(20)
+query_main.awaitTermination(20)
 
 #bets placed per gameweek
-df_bp = df3.groupby("Gameweek_id","timestamp").count()
+df_bp = df3.groupby("Gameweek_id",window("timestamp", "15mins")).count()
 df_bp.printSchema()
 
 
@@ -148,8 +176,7 @@ query1.awaitTermination(20)
 
 # total amount spent by user for gameweek
 
-df_am = df3.groupby("Gameweek_id","timestamp").agg({"amount": "sum"}).select("Gameweek_id","timestamp", col("sum(amount)").alias("total amount"))
-print('schema total amount spent by users for gameweek')
+df_am = df3.groupby("Gameweek_id",window("timestamp", "15mins")).agg({"amount": "sum"}).select("Gameweek_id","timestamp", col("sum(amount)").alias("total amount"))
 df_am.printSchema()
 
 def write_postgresql_gw_amt(df, epochId):
@@ -173,8 +200,7 @@ query2 =  df_am.writeStream \
 query2.awaitTermination(20)
 
 # total profit for gameweek
-df_gw = df3.groupby("Gameweek_id",'timestamp').agg({"winnings": "sum"}).select("Gameweek_id","timestamp", col("sum(winnings)").alias("total profit"))
-print('schema total profit for gameweek')
+df_gw = df3.groupby("Gameweek_id",window("timestamp", "15mins")).agg({"winnings": "sum"}).select("Gameweek_id","timestamp", col("sum(winnings)").alias("total profit"))
 df_gw.printSchema()
 
 def write_postgresql_gw_win(df, epochId):
@@ -197,8 +223,7 @@ query3 =  df_gw.writeStream \
 query3.awaitTermination(20)
 
 # total profit per company
-df_bc = df3.groupby("bet_company","timestamp").agg({"winnings": "sum"}).select("bet_company","timestamp",col("sum(winnings)").alias("profit"))
-print('schema total profit per company')
+df_bc = df3.groupby("bet_company",window("timestamp", "15mins")).agg({"winnings": "sum"}).select("bet_company","timestamp",col("sum(winnings)").alias("profit"))
 df_bc.printSchema()
 
 
@@ -222,9 +247,10 @@ query4 =  df_bc.writeStream \
             .start()
 
 
+# ran some test aggregations below
+
 #total profit for company per gameweek
 df_bcgw = df3.groupby(["Gameweek_id","bet_company"]).agg({"winnings": "sum"})
-print("total profit for company per gameweek")
 df_bcgw.printSchema()
 
 query5 = df_bcgw.writeStream \
@@ -237,7 +263,6 @@ query5.awaitTermination(20)
 
 # Mean Number of clicks per gameweek
 df_clicks = df3.groupby("Gameweek_id").agg({"number_clicks": "mean"})
-print('schema Mean Number of clicks per gameweek')
 df_clicks.printSchema()
 
 query6 = df_clicks.writeStream \
@@ -249,7 +274,6 @@ query6.awaitTermination(20)
 
 # Mean time spent per gameweek
 df_TS = df3.groupby("Gameweek_id").agg({"time_spent": "mean"})
-print('schema Mean time spent per gameweek')
 df_TS.printSchema()
 
 query7 = df_TS.writeStream \
@@ -262,7 +286,6 @@ query7.awaitTermination(20)
 
 # Mean Number of clicks per country
 df_nc = df3.groupby("country").agg({"number_clicks": "mean"})
-print('schema Mean Number of clicks per country')
 df_nc.printSchema()
 
 query8 = df_nc.writeStream \
@@ -275,7 +298,6 @@ query8.awaitTermination(20)
 
 # Mean time spent per country
 df_tc = df3.groupby("Gameweek_id").agg({"time_spent": "mean"})
-print('schema Mean time spent per country')
 df_tc.printSchema()
 
 query9 = df_tc.writeStream \
@@ -289,7 +311,6 @@ query9.awaitTermination(20)
 
 # total amount for country
 df_ta = df3.groupby("country").agg({"amount": "sum"}).select("country", col("sum(amount)").alias("total amount"))
-print('schema total amount for country')
 df_ta.printSchema()
 
 query10 = df_ta.writeStream \
@@ -298,22 +319,3 @@ query10 = df_ta.writeStream \
         .start()
 
 query10.awaitTermination(20)
-
-
-
-
-# betsWithWatermark = df_bp.withWatermark("betstime", "2 hours")
-# amountWithWatermark = df_am.withWatermark("amounttime", "2 hours")
-
-# joined_df = betsWithWatermark.join(
-#   amountWithWatermark, expr(""Gameweek_id = Gameweek_id AND
-#   betstime >= amounttime AND
-#   betstime <= amounttime + interval 1 hour
-#     ""),
-#   "inner"
-# )
-
-# queryjoin = joined_df.writeStream \
-#         .outputMode("complete") \
-#         .format("console") \
-#         .start()

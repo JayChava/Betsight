@@ -16,6 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 1,
+  "iteration": 1602890278930,
   "links": [],
   "panels": [
     {
@@ -138,27 +139,65 @@
       "targets": [
         {
           "format": "time_series",
-          "group": [],
-          "metricColumn": "none",
+          "group": [
+            {
+              "params": [
+                "$__interval",
+                "none"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "bet_company"
+              ],
+              "type": "column"
+            }
+          ],
+          "metricColumn": "bet_company",
           "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroupAlias(\"timestamp\",$__interval),\n  \"bet_company\" AS metric,\n  sum(winnings) AS \"winnings\"\nFROM clickstream\nWHERE\n  $__timeFilter(\"timestamp\")\nGROUP BY 1,2\nORDER BY 1,2\n",
+          "rawSql": "SELECT\n  $__timeGroupAlias(\"timestamp\",$__interval),\n  bet_company AS metric,\n  sum(winnings) AS \"winnings\"\nFROM clickstream\nWHERE\n  $__timeFilter(\"timestamp\") AND\n  bet_company IN ($Companies_list)\nGROUP BY 1, bet_company,2\nORDER BY 1,2",
           "refId": "A",
           "select": [
             [
               {
                 "params": [
-                  "value"
+                  "winnings"
                 ],
                 "type": "column"
+              },
+              {
+                "params": [
+                  "sum"
+                ],
+                "type": "aggregate"
+              },
+              {
+                "params": [
+                  "winnings"
+                ],
+                "type": "alias"
               }
             ]
           ],
-          "timeColumn": "time",
+          "table": "clickstream",
+          "timeColumn": "\"timestamp\"",
+          "timeColumnType": "timestamp",
           "where": [
             {
               "name": "$__timeFilter",
               "params": [],
               "type": "macro"
+            },
+            {
+              "datatype": "varchar",
+              "name": "",
+              "params": [
+                "bet_company",
+                "IN",
+                "$Companies_list"
+              ],
+              "type": "expression"
             }
           ]
         }
@@ -221,7 +260,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroupAlias(\"timestamp\",$__interval),\n  \"bet_type\" AS metric,\n  avg(winnings) AS \"winnings\"\nFROM clickstream\nWHERE\n  $__timeFilter(\"timestamp\")\nGROUP BY 1,2\nORDER BY 1,2\n\n",
+          "rawSql": "SELECT\n  $__timeGroupAlias(\"Date\",$__interval),\n  \"bet_type\" AS metric,\n  avg(winnings) AS \"winnings\"\nFROM clickstream\nWHERE\n  $__timeFilter(\"timestamp\") and\n  bet_company IN ($Companies_list)\nGROUP BY 1,bet_company, 2\nORDER BY 1,2\n\n",
           "refId": "A",
           "select": [
             [
@@ -246,6 +285,7 @@
       "timeFrom": null,
       "timeShift": null,
       "title": "Average profit - ODD type",
+      "transparent": true,
       "type": "bargauge"
     },
     {
@@ -306,7 +346,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroupAlias(\"timestamp\",$__interval),\n  \"bet_company\" AS metric,\n  avg(winnings) AS \"profits\"\nFROM clickstream\nWHERE\n  $__timeFilter(\"timestamp\")\nGROUP BY 1,2\nORDER BY 1,2\n",
+          "rawSql": "SELECT\n  $__timeGroupAlias(\"timestamp\",$__interval),\n  \"bet_company\" AS metric,\n  avg(\"winnings\") AS \"profits\"\nFROM clickstream\nWHERE\n  $__timeFilter(\"timestamp\") and\n  bet_company IN ($Companies_list)\nGROUP BY 1,bet_company,2\nORDER BY 1,2\n",
           "refId": "A",
           "select": [
             [
@@ -340,6 +380,7 @@
         "sort": 1,
         "value_type": "individual"
       },
+      "transparent": true,
       "type": "graph",
       "xaxis": {
         "buckets": null,
@@ -370,6 +411,508 @@
         "align": false,
         "alignLevel": null
       }
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 18
+      },
+      "id": 12,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "vertical",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "7.2.1",
+      "targets": [
+        {
+          "format": "time_series",
+          "group": [
+            {
+              "params": [
+                "$__interval",
+                "none"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "bet_company"
+              ],
+              "type": "column"
+            }
+          ],
+          "metricColumn": "bet_company",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  $__timeGroupAlias(\"timestamp\",$__interval),\n  bet_company AS metric,\n  avg(number_clicks) AS \"number_clicks\"\nFROM clickstream\nWHERE\n  $__timeFilter(\"timestamp\") AND\n  bet_company IN ($Companies_list)\nGROUP BY 1, bet_company,2\nORDER BY 1,2",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "number_clicks"
+                ],
+                "type": "column"
+              },
+              {
+                "params": [
+                  "avg"
+                ],
+                "type": "aggregate"
+              },
+              {
+                "params": [
+                  "number_clicks"
+                ],
+                "type": "alias"
+              }
+            ]
+          ],
+          "table": "clickstream",
+          "timeColumn": "\"timestamp\"",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            },
+            {
+              "datatype": "varchar",
+              "name": "",
+              "params": [
+                "bet_company",
+                "=",
+                "$Companies_list"
+              ],
+              "type": "expression"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Average number of clicks per user",
+      "type": "stat"
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": null,
+            "filterable": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "dark-blue",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 18
+      },
+      "id": 10,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "7.2.1",
+      "targets": [
+        {
+          "format": "time_series",
+          "group": [
+            {
+              "params": [
+                "$__interval",
+                "none"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "bet_company"
+              ],
+              "type": "column"
+            }
+          ],
+          "metricColumn": "bet_company",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  $__timeGroupAlias(\"timestamp\",$__interval),\n  bet_company AS metric,\n  avg(\"Time_spent\") AS \"\"\"Time_spent\"\"\"\nFROM clickstream\nWHERE\n  $__timeFilter(\"timestamp\") AND\n  bet_company IN ($Companies_list)\nGROUP BY 1, bet_company,2\nORDER BY 1,2",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "\"Time_spent\""
+                ],
+                "type": "column"
+              },
+              {
+                "params": [
+                  "avg"
+                ],
+                "type": "aggregate"
+              },
+              {
+                "params": [
+                  "\"Time_spent\""
+                ],
+                "type": "alias"
+              }
+            ]
+          ],
+          "table": "clickstream",
+          "timeColumn": "\"timestamp\"",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            },
+            {
+              "datatype": "varchar",
+              "name": "",
+              "params": [
+                "bet_company",
+                "IN",
+                "$Companies_list"
+              ],
+              "type": "expression"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Average time spent per user",
+      "type": "gauge"
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "currencyEUR"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 23
+      },
+      "id": 14,
+      "options": {
+        "displayMode": "lcd",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "pluginVersion": "7.2.1",
+      "targets": [
+        {
+          "format": "time_series",
+          "group": [
+            {
+              "params": [
+                "$__interval",
+                "none"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "bet_company"
+              ],
+              "type": "column"
+            },
+            {
+              "params": [
+                "country"
+              ],
+              "type": "column"
+            }
+          ],
+          "metricColumn": "country",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  $__timeGroupAlias(\"timestamp\",$__interval),\n  country AS metric,\n  avg(amount) AS \"amount\"\nFROM clickstream\nWHERE\n  $__timeFilter(\"timestamp\") AND\n  country IN ($country_list) AND\n  bet_company IN ($Companies_list)\nGROUP BY 1, bet_company, country,2\nORDER BY 1,2",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "amount"
+                ],
+                "type": "column"
+              },
+              {
+                "params": [
+                  "avg"
+                ],
+                "type": "aggregate"
+              },
+              {
+                "params": [
+                  "amount"
+                ],
+                "type": "alias"
+              }
+            ]
+          ],
+          "table": "clickstream",
+          "timeColumn": "\"timestamp\"",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            },
+            {
+              "datatype": "varchar",
+              "name": "",
+              "params": [
+                "country",
+                "=",
+                "$country_list"
+              ],
+              "type": "expression"
+            },
+            {
+              "datatype": "varchar",
+              "name": "",
+              "params": [
+                "bet_company",
+                "=",
+                "$Companies_list"
+              ],
+              "type": "expression"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Average amount spent per country ",
+      "transparent": true,
+      "type": "bargauge"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": null,
+            "filterable": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "light-green",
+                "value": null
+              },
+              {
+                "color": "semi-dark-red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 23
+      },
+      "id": 16,
+      "interval": null,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.2.1",
+      "targets": [
+        {
+          "format": "time_series",
+          "group": [
+            {
+              "params": [
+                "$__interval",
+                "none"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "bet_company"
+              ],
+              "type": "column"
+            },
+            {
+              "params": [
+                "country"
+              ],
+              "type": "column"
+            }
+          ],
+          "metricColumn": "country",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  $__timeGroupAlias(\"timestamp\",$__interval),\n  country AS metric,\n  avg(\"Time_spent\") AS \"\"\"Time_spent\"\"\"\nFROM clickstream\nWHERE\n  $__timeFilter(\"timestamp\") AND\n  bet_company IN ($Companies_list) AND\n  country IN ($country_list)\nGROUP BY 1, bet_company, country,2\nORDER BY 1,2",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "\"Time_spent\""
+                ],
+                "type": "column"
+              },
+              {
+                "params": [
+                  "avg"
+                ],
+                "type": "aggregate"
+              },
+              {
+                "params": [
+                  "\"Time_spent\""
+                ],
+                "type": "alias"
+              }
+            ]
+          ],
+          "table": "clickstream",
+          "timeColumn": "\"timestamp\"",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            },
+            {
+              "datatype": "varchar",
+              "name": "",
+              "params": [
+                "bet_company",
+                "=",
+                "$Companies_list"
+              ],
+              "type": "expression"
+            },
+            {
+              "datatype": "varchar",
+              "name": "",
+              "params": [
+                "country",
+                "=",
+                "$country_list"
+              ],
+              "type": "expression"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Average time spent per country",
+      "type": "stat"
     }
   ],
   "refresh": false,
@@ -377,15 +920,181 @@
   "style": "dark",
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": "",
+        "current": {
+          "selected": true,
+          "tags": [],
+          "text": [
+            "PS",
+            "BW",
+            "B365",
+            "VC",
+            "IW",
+            "WH"
+          ],
+          "value": [
+            "PS",
+            "BW",
+            "B365",
+            "VC",
+            "IW",
+            "WH"
+          ]
+        },
+        "datasource": "PostgreSQL",
+        "definition": "SELECT DISTINCT(bet_company) FROM clickstream;",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Betting Companies",
+        "multi": true,
+        "name": "Companies_list",
+        "options": [
+          {
+            "selected": true,
+            "text": "PS",
+            "value": "PS"
+          },
+          {
+            "selected": true,
+            "text": "BW",
+            "value": "BW"
+          },
+          {
+            "selected": true,
+            "text": "B365",
+            "value": "B365"
+          },
+          {
+            "selected": true,
+            "text": "VC",
+            "value": "VC"
+          },
+          {
+            "selected": true,
+            "text": "IW",
+            "value": "IW"
+          },
+          {
+            "selected": true,
+            "text": "WH",
+            "value": "WH"
+          }
+        ],
+        "query": "SELECT DISTINCT(bet_company) FROM clickstream;",
+        "refresh": 0,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "tags": [],
+          "text": [
+            "England",
+            "France",
+            "Germany",
+            "Greece"
+          ],
+          "value": [
+            "England",
+            "France",
+            "Germany",
+            "Greece"
+          ]
+        },
+        "datasource": "PostgreSQL",
+        "definition": "SELECT DISTINCT(country) FROM clickstream;",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Countries",
+        "multi": true,
+        "name": "country_list",
+        "options": [
+          {
+            "selected": true,
+            "text": "England",
+            "value": "England"
+          },
+          {
+            "selected": true,
+            "text": "France",
+            "value": "France"
+          },
+          {
+            "selected": true,
+            "text": "Germany",
+            "value": "Germany"
+          },
+          {
+            "selected": true,
+            "text": "Greece",
+            "value": "Greece"
+          },
+          {
+            "selected": false,
+            "text": "Italy",
+            "value": "Italy"
+          },
+          {
+            "selected": false,
+            "text": "Netherlands",
+            "value": "Netherlands"
+          },
+          {
+            "selected": false,
+            "text": "Portugal",
+            "value": "Portugal"
+          },
+          {
+            "selected": false,
+            "text": "Scotland",
+            "value": "Scotland"
+          },
+          {
+            "selected": false,
+            "text": "Spain",
+            "value": "Spain"
+          },
+          {
+            "selected": false,
+            "text": "Turkey",
+            "value": "Turkey"
+          }
+        ],
+        "query": "SELECT DISTINCT(country) FROM clickstream;",
+        "refresh": 0,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
   },
   "time": {
-    "from": "2020-10-09T04:58:30.000Z",
-    "to": "2020-10-09T05:16:30.000Z"
+    "from": "2020-10-13T19:22:30.686Z",
+    "to": "2020-10-13T19:42:34.965Z"
   },
-  "timepicker": {},
+  "timepicker": {
+    "hidden": false,
+    "refresh_intervals": [
+      "5s"
+    ]
+  },
   "timezone": "",
-  "title": "Betting companies profits",
+  "title": "Betting companies profits dashboard",
   "uid": "3gCzXNcGz",
-  "version": 6
+  "version": 19
 }
