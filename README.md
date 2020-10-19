@@ -208,9 +208,9 @@ Watermark set at 15 minutes, optimal time for both my topics to be completely co
 parsedData.groupBy(window("timestamp", "15mins")).max(amount)
 ```
 
-# Contact
+## Contact
 
-## Jayanth Chava
+### Jayanth Chava
 
 
 [![Gmail](https://img.shields.io/badge/gmail-D14836?&style=for-the-badge&logo=gmail&logoColor=white)](jaychava95@gmail.com)
