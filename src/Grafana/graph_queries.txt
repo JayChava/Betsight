@@ -1,0 +1,99 @@
+
+# Betting Websites Profits
+
+SELECT
+  $__timeGroupAlias("timestamp",$__interval),
+  bet_company AS metric,
+  sum(winnings) AS "winnings"
+FROM clickstream
+WHERE
+  $__timeFilter("timestamp") AND
+  bet_company IN ($Companies_list)
+GROUP BY 1, bet_company,2
+ORDER BY 1,2
+
+
+# Average profit - ODD type
+
+SELECT
+  $__timeGroupAlias("Date",$__interval),
+  "bet_type" AS metric,
+  avg(winnings) AS "winnings"
+FROM clickstream
+WHERE
+  $__timeFilter("timestamp") and
+  bet_company IN ($Companies_list)
+GROUP BY 1,bet_company, 2
+ORDER BY 1,2
+
+
+# Profits over time
+
+SELECT
+  $__timeGroupAlias("timestamp",$__interval),
+  "bet_company" AS metric,
+  avg("winnings") AS "profits"
+FROM clickstream
+WHERE
+  $__timeFilter("timestamp") and
+  bet_company IN ($Companies_list)
+GROUP BY 1,bet_company,2
+ORDER BY 1,2
+
+
+# Average number of clicks per user
+
+SELECT
+  $__timeGroupAlias("timestamp",$__interval),
+  bet_company AS metric,
+  avg(number_clicks) AS "number_clicks"
+FROM clickstream
+WHERE
+  $__timeFilter("timestamp") AND
+  bet_company IN ($Companies_list)
+GROUP BY 1, bet_company,2
+ORDER BY 1,2
+
+
+# Average time spent per user
+
+SELECT
+  $__timeGroupAlias("timestamp",$__interval),
+  bet_company AS metric,
+  avg("Time_spent") AS """Time_spent"""
+FROM clickstream
+WHERE
+  $__timeFilter("timestamp") AND
+  bet_company IN ($Companies_list)
+GROUP BY 1, bet_company,2
+ORDER BY 1,2
+
+
+# Average amount spent per country 
+
+SELECT
+  $__timeGroupAlias("timestamp",$__interval),
+  country AS metric,
+  avg(amount) AS "amount"
+FROM clickstream
+WHERE
+  $__timeFilter("timestamp") AND
+  country IN ($country_list) AND
+  bet_company IN ($Companies_list)
+GROUP BY 1, bet_company, country,2
+ORDER BY 1,2
+
+
+# Average time spent per country
+
+SELECT
+  $__timeGroupAlias("timestamp",$__interval),
+  country AS metric,
+  avg("Time_spent") AS """Time_spent"""
+FROM clickstream
+WHERE
+  $__timeFilter("timestamp") AND
+  bet_company IN ($Companies_list) AND
+  country IN ($country_list)
+GROUP BY 1, bet_company, country,2
+ORDER BY 1,2

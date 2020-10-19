@@ -31,8 +31,7 @@ The current market sits at roughly USD 52 Billion, the growth of the legal sport
 
 Online betting companies rely solely on the performance of their website for profits, data and metrics calculating user engagement, odds purchased and session level metrics are extremely important for making key business decisions. The idea behind the project is to build a real-time dashboard which gives them constant updates and supervision of their websites performance. This dashboard could potentially help people all the way from ground-level business analysts to stakeholders help them monitor and make key decision for their company.
 
-[Slides](https://drive.google.com/file/d/1nSiRXTwhW1k_9Q-33aqQVbN-E3zSdt_r/view?usp=sharing), [Demo]()
-
+[Slides](https://drive.google.com/file/d/1nSiRXTwhW1k_9Q-33aqQVbN-E3zSdt_r/view?usp=sharing), [Demo](https://youtu.be/gPwRWQjr06M)
 
 ## Architecture
 
@@ -178,7 +177,7 @@ Step6: Take the IP address or DNS of your server and place it on address bar of 
 https://PublicDNS:3000
 ```
 
-# Engineering Challenges
+## Engineering Challenges
 
 ### Reducing Latency 
 
